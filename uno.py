@@ -126,7 +126,7 @@ class Player:
     def shuffle_hand(self) -> None:
         shuffle(self.hand)
         
-    def play_card(self, g_state: GameState) -> Card | bool :
+    def play_card(self, g_state: 'GameState') -> Card | bool :
         for card in self.hand:
             playable = g_state.deck.can_play_card(card)
             if playable:
