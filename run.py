@@ -1,6 +1,5 @@
 from dataclasses import replace
 from random import choice
-from typing import Type
 import uno
 
 def simulate_game(debug: bool = False, 
@@ -36,42 +35,37 @@ def simulate_game(debug: bool = False,
             return ("Timed Out", turn_counter)
         
         current_player = players[turn]
-        card_played = False
+        card_played = current_player.play_card(uno.GameState(deck))
 
-        for card in current_player.hand:
-            if deck.can_play_card(card):
-                current_player.play_card(card, deck)
-                card_played = True
-                
-                if debug:
-                    print(f"{current_player.name} plays {str(card)}.")
-                
-                if card.value == uno.Value.REVERSE:
+        if type(card_played) == uno.Card:
+            deck.discard.insert(0, card_played)
+
+            if debug:
+                print(f"{current_player.name} plays {str(card_played)}.")
+            
+            match card_played.value:
+                case uno.Value.REVERSE:
                     direction *= -1
-                    
-                if card.value == uno.Value.SKIP:
+                
+                case uno.Value.SKIP:
                     turn = next_player(turn)
-                    
-                if card.value == uno.Value.DRAW_TWO:
+                
+                case uno.Value.DRAW_TWO:
                     next = next_player(turn)
-                    for i in range(0, 2):
+                    for i in range(2):
                         players[next].draw_card(deck.draw())
                     turn = next_player(next)
-                    
-                if card.value in [uno.Value.WILD, uno.Value.DRAW_FOUR]:
-                    new_color = choice([uno.Color.RED, uno.Color.YELLOW, uno.Color.GREEN, uno.Color.BLUE])
+                
+                case x if x in [uno.Value.WILD, uno.Value.DRAW_FOUR]:
+                    new_color = current_player.choose_color()
                     deck.discard[0] = replace(deck.discard[0], color=new_color)
-                    
                     if debug:
                         print(f"{current_player.name} changes color to {new_color.value}.")
-                
-                if card.value == uno.Value.DRAW_FOUR:
-                    next = next_player(turn)
-                    for i in range(0, 4):
-                        players[next].draw_card(deck.draw())
-                    turn = next_player(next)
-                    
-                break
+                    if card_played == uno.Value.DRAW_FOUR:
+                        next = next_player(turn)
+                        for i in range(0, 4):
+                            players[next].draw_card(deck.draw())
+                        turn = next_player(next)
             
         if current_player.hand.__len__() == 0:
             if debug:
@@ -80,7 +74,7 @@ def simulate_game(debug: bool = False,
                 
             return (current_player.name, turn_counter)
             
-        if not card_played:
+        if card_played == False:
             if debug:
                 print(f"{current_player.name} draws.")
                 

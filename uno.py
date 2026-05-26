@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from random import shuffle
+from random import shuffle, choice
 
 class Color(Enum):
     RED = "Red"
@@ -126,10 +126,19 @@ class Player:
     def shuffle_hand(self) -> None:
         shuffle(self.hand)
         
-    def play_card(self, card: Card, deck: Deck) -> bool:
-        playable = deck.can_play_card(card)
-        if playable:
-            self.hand.remove(card)
-            deck.discard.insert(0, card)
-            
-        return playable
+    def play_card(self, g_state: GameState) -> Card | bool :
+        for card in self.hand:
+            playable = g_state.deck.can_play_card(card)
+            if playable:
+                self.hand.remove(card)
+                return card
+        return False
+    
+    def choose_color(self):
+        return choice([Color.RED, Color.YELLOW, Color.GREEN, Color.BLUE])
+    
+class GameState:
+    deck: Deck
+
+    def __init__(self, deck: Deck):
+        self.deck = deck
