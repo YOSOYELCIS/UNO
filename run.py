@@ -80,7 +80,6 @@ def simulate_game(debug: bool = False,
                 
             current_player.draw_card(deck.draw())
             
-        current_player.shuffle_hand()
         turn = next_player(turn)
         turn_counter += 1
         
