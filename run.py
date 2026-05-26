@@ -1,9 +1,14 @@
 from dataclasses import replace
 from random import choice
+from typing import Type
 import uno
 
-def simulate_game(debug: bool = False) -> tuple[str, int]:
-    players: list[uno.Player] = [uno.Player(name) for name in ["Player 1", "Player 2", "Player 3", "Player 4"]]
+def simulate_game(debug: bool = False, 
+                  player1: uno.Player = uno.Player("Player 1"), 
+                  player2: uno.Player = uno.Player("Player 2"), 
+                  player3: uno.Player = uno.Player("Player 3"), 
+                  player4: uno.Player = uno.Player("Player 4")) -> tuple[str, int]:
+    players = [player1, player2, player3, player4]
 
     deck = uno.Deck()
     deck.shuffle()
@@ -88,8 +93,8 @@ def simulate_game(debug: bool = False) -> tuple[str, int]:
 # simulate_many_games() : Runs "n" games of UNO using simulate_game()
 def simulate_many_games(n: int, debug: bool = False) -> None:
     game_results: list[tuple[str, int]] = []
-    for i in range(0, n):
-        game_results.append(simulate_game())
+    for _ in range(0, n):
+        game_results.append(simulate_game(debug))
         
     print("Player Wins:\n")
 
