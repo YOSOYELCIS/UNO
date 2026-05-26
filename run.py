@@ -85,16 +85,20 @@ def simulate_game(debug: bool = False) -> tuple[str, int]:
         turn = next_player(turn)
         turn_counter += 1
         
-if __name__ == "__main__":
-    game_status: list[tuple[str, int]] = []
-    for i in range(0, 1000):
-        game_status.append(simulate_game())
+# simulate_many_games() : Runs "n" games of UNO using simulate_game()
+def simulate_many_games(n: int, debug: bool = False) -> None:
+    game_results: list[tuple[str, int]] = []
+    for i in range(0, n):
+        game_results.append(simulate_game())
         
     print("Player Wins:\n")
 
     player_wins = {}
-    for status in game_status:
-        player_wins[status[0]] = player_wins.get(status[0], 0) + 1
+    for result in game_results:
+        player_wins[result[0]] = player_wins.get(result[0], 0) + 1
         
     for player, wins in player_wins.items():
         print(f"{player}: {wins}")
+
+if __name__ == "__main__":
+    simulate_many_games(1000)
