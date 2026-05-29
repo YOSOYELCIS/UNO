@@ -97,7 +97,6 @@ class SimpleTreeAgent(Player):
             return False
         
         # Decision 1: Last card to play (UNO)
-        # Decision 1: Last card to play (UNO)
         if len(self.hand) == 1:
             chosen = playable_cards[0]
             self.hand.remove(chosen)
