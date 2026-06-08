@@ -6,6 +6,7 @@ import simple_agents
 def simulate_game(players: list[uno.Player] = 
                   [simple_agents.Randy("Player 1"), simple_agents.Randy("Player 2"), simple_agents.Randy("Player 3"), simple_agents.Randy("Player 4")],
                   debug: bool = False) -> tuple[str, int]:
+    player_count = len(players)
     deck = uno.Deck()
     deck.shuffle()
 
@@ -32,7 +33,7 @@ def simulate_game(players: list[uno.Player] =
             return ("Timed Out", turn_counter)
         
         current_player = players[turn]
-        card_played = current_player.play_card(uno.GameState(deck))
+        card_played = current_player.play_card(uno.GameState(deck, player_count))
 
         if type(card_played) == uno.Card:
             deck.discard.insert(0, card_played)

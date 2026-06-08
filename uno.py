@@ -50,6 +50,7 @@ class Card:
         return self.format_card(ansi_code)
 
 class Deck:
+    full_deck: list[Card]
     pile: list[Card]
     discard: list[Card]
     
@@ -72,6 +73,8 @@ class Deck:
                         
                         self.pile.append(Card(color, value))
         
+        self.full_deck = self.pile.copy()
+
         self.shuffle()
         self.discard.append(self.pile.pop())
         
@@ -139,6 +142,8 @@ class Player:
     
 class GameState:
     deck: Deck
+    player_count: int
 
-    def __init__(self, deck: Deck):
+    def __init__(self, deck: Deck, player_count: int):
         self.deck = deck
+        self.player_count = player_count
