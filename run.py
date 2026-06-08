@@ -2,6 +2,7 @@ from dataclasses import replace
 from random import choice
 import uno
 import simple_agents
+import mdp_agent
 
 def simulate_game(players: list[uno.Player] = 
                   [simple_agents.Randy("Player 1"), simple_agents.Randy("Player 2"), simple_agents.Randy("Player 3"), simple_agents.Randy("Player 4")],
