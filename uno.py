@@ -78,6 +78,14 @@ class Deck:
 
         self.shuffle()
         self.discard.append(self.pile.pop())
+
+    @staticmethod
+    def custom_deck(full_deck: list[Card], pile: list[Card], discard: list[Card]):
+        new_deck: Deck = Deck()
+        new_deck.full_deck = full_deck
+        new_deck.pile = pile
+        new_deck.discard = discard
+        return new_deck
         
     def draw(self, debug: bool = False) -> Card:
         if not self.pile:
@@ -98,7 +106,10 @@ class Deck:
     def can_play_card(self, card: Card) -> bool:
         top_card = self.discard[0]
         return card.color == top_card.color or card.value == top_card.value or card.color == Color.BLACK
-        
+    
+    def play_to_pile(self, card_played: Card):
+        self.discard.insert(0, card_played)
+
     def __str__(self) -> str:
         out = "DRAW:\n"
         for card in self.pile:
@@ -151,15 +162,15 @@ class GameState:
     game_end: bool
     debug: bool
 
-    def __init__(self, players: list[Player] = [], debug: bool = False):
+    def __init__(self, players: list[Player] = [], debug: bool = False, turn: int = 0, direction: int = 1, game_end: bool = False):
         self.deck = Deck()
         self.deck.shuffle()
         self.players = players
         self.player_count = len(players)
-        self.turn = 0
+        self.turn = turn
         self.turn_counter = 0
-        self.direction = 1
-        self.game_end = False
+        self.direction = direction
+        self.game_end = game_end
         self.debug = debug
 
         for _ in range(0, 7):
@@ -175,12 +186,12 @@ class GameState:
             self.turn = self.player_count - 1
         return self.turn
     
-    def process_turn(self):
+    def process_turn(self) -> Player:
         current_player = self.players[self.turn]
         card_played = current_player.play_card(self)
 
         if type(card_played) == Card:
-            self.deck.discard.insert(0, card_played)
+            self.deck.play_to_pile(card_played)
 
             if self.debug:
                 print(f"{current_player.name} plays {str(card_played)}.")
@@ -222,3 +233,47 @@ class GameState:
         self.turn_counter += 1
 
         return current_player
+    
+    def simulate_turn(self, card_played: Card) -> GameState:
+        """
+        Returns a new game state after simulating what would happen if a card were played in the current game state
+        """
+        new_game_state = GameState([player.dummy_player() for player in self.players], self.debug, self.turn, self.direction, self.game_end)
+        
+        current_player = new_game_state.players[new_game_state.turn]
+
+        if type(card_played) == Card:
+            new_game_state.deck.play_to_pile(card_played)
+            
+            match card_played.value:
+                case Value.REVERSE:
+                    new_game_state.direction *= -1
+                
+                case Value.SKIP:
+                    new_game_state.turn = new_game_state.next_player()
+                
+                case Value.DRAW_TWO:
+                    next = new_game_state.next_player()
+                    for _ in range(2):
+                        new_game_state.players[next].draw_card(new_game_state.deck.draw())
+                    new_game_state.turn = new_game_state.next_player()
+                
+                case x if x in [Value.WILD, Value.DRAW_FOUR]:
+                    new_color = current_player.choose_color()
+                    new_game_state.deck.discard[0] = replace(new_game_state.deck.discard[0], color=new_color)
+                    if card_played == Value.DRAW_FOUR:
+                        next = new_game_state.next_player()
+                        for _ in range(0, 4):
+                            new_game_state.players[next].draw_card(new_game_state.deck.draw())
+                        new_game_state.turn = new_game_state.next_player()
+            
+        if current_player.hand.__len__() == 0:
+            new_game_state.game_end = True
+            
+        if card_played == False:
+            current_player.draw_card(new_game_state.deck.draw())
+            
+        new_game_state.turn = new_game_state.next_player()
+        new_game_state.turn_counter += 1
+
+        return new_game_state
