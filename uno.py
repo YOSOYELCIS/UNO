@@ -1,3 +1,4 @@
+from dataclasses import replace
 from dataclasses import dataclass
 from enum import Enum
 from random import shuffle, choice
@@ -142,8 +143,82 @@ class Player:
     
 class GameState:
     deck: Deck
+    players: list[Player]
     player_count: int
+    turn: int
+    turn_counter: int
+    direction: int
+    game_end: bool
+    debug: bool
 
-    def __init__(self, deck: Deck, player_count: int):
-        self.deck = deck
-        self.player_count = player_count
+    def __init__(self, players: list[Player] = [], debug: bool = False):
+        self.deck = Deck()
+        self.deck.shuffle()
+        self.players = players
+        self.player_count = len(players)
+        self.turn = 0
+        self.turn_counter = 0
+        self.direction = 1
+        self.game_end = False
+        self.debug = debug
+
+        for _ in range(0, 7):
+            for player in players:
+                player.draw_card(self.deck.draw())
+
+    def next_player(self) -> int:
+        self.turn += self.direction
+        if self.turn > self.player_count - 1:
+            self.turn = 0
+            
+        if self.turn < 0:
+            self.turn = self.player_count - 1
+        return self.turn
+    
+    def process_turn(self):
+        current_player = self.players[self.turn]
+        card_played = current_player.play_card(self)
+
+        if type(card_played) == Card:
+            self.deck.discard.insert(0, card_played)
+
+            if self.debug:
+                print(f"{current_player.name} plays {str(card_played)}.")
+            
+            match card_played.value:
+                case Value.REVERSE:
+                    self.direction *= -1
+                
+                case Value.SKIP:
+                    turn = self.next_player()
+                
+                case Value.DRAW_TWO:
+                    next = self.next_player()
+                    for i in range(2):
+                        self.players[next].draw_card(self.deck.draw())
+                    turn = self.next_player()
+                
+                case x if x in [Value.WILD, Value.DRAW_FOUR]:
+                    new_color = current_player.choose_color()
+                    self.deck.discard[0] = replace(self.deck.discard[0], color=new_color)
+                    if self.debug:
+                        print(f"{current_player.name} changes color to {new_color.value}.")
+                    if card_played == Value.DRAW_FOUR:
+                        next = self.next_player()
+                        for i in range(0, 4):
+                            self.players[next].draw_card(self.deck.draw())
+                        turn = self.next_player()
+            
+        if current_player.hand.__len__() == 0:
+            self.game_end = True
+            
+        if card_played == False:
+            if self.debug:
+                print(f"{current_player.name} draws.")
+                
+            current_player.draw_card(self.deck.draw())
+            
+        self.turn = self.next_player()
+        self.turn_counter += 1
+
+        return current_player
