@@ -185,6 +185,18 @@ class GameState:
             for player in players:
                 player.draw_card(self.deck.draw())
 
+    def __str__(self):
+        return f"Player hands: {[player.hand for player in self.players]} ; Turn: {self.turn} ; Direction: {self.direction} ; Draw Pile Size : {self.deck.pile.__len__()}"
+    
+    def __eq__(self, other):
+        if isinstance(other, GameState):
+            return self.__str__() == other.__str__()
+        else:
+            return False
+        
+    def __hash__(self):
+        return hash(self.__str__())
+
     def next_player(self) -> int:
         self.turn += self.direction
         if self.turn > self.player_count - 1:
