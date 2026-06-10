@@ -40,5 +40,10 @@ def simulate_many_games(n: int, players: list[uno.Player], debug: bool = False) 
         print(f"{player}: {wins}")
 
 if __name__ == "__main__":
-    players = [simple_agents.SimpleTreeAgent("SimpleTreeAgent"), simple_agents.Firsty("Firsty"), simple_agents.Randy("Randy"), simple_agents.Powery("Powery"), simple_agents.Waity("Waity")]
-    simulate_many_games(1000, players)
+    players = [simple_agents.SimpleTreeAgent("SimpleTreeAgent"), 
+               simple_agents.Firsty("Firsty"), 
+               simple_agents.Randy("Randy"), 
+               simple_agents.Powery("Powery"), 
+               simple_agents.Waity("Waity"),
+               mdp_agent.MDP_Agent("MDP")]
+    simulate_many_games(1, players)

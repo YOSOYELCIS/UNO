@@ -152,6 +152,14 @@ class Player:
     def choose_color(self):
         return choice([Color.RED, Color.YELLOW, Color.GREEN, Color.BLUE])
     
+    def dummy_player(self):
+        """
+        Creates a dummy player that takes less processing space when simulating future turns
+        """
+        new_player = Player(self.name)
+        new_player.hand = self.hand.copy()
+        return new_player
+    
 class GameState:
     deck: Deck
     players: list[Player]
