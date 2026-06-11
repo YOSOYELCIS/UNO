@@ -1,8 +1,7 @@
 import random
 
-import agents.mdp_agent as mdp_agent_recursive
+import agents.mdp_agent as mdp_agent
 import agents.simple_agents as simple_agents
-import mdp_agent
 import uno
 
 # Simulates one game with default player behavior.
@@ -14,6 +13,7 @@ def simulate_game(
          simple_agents.Default("Player 4")],
     debug: bool = False) -> tuple[str, int]:
     
+    random.shuffle(players)
     game_state: uno.GameState = uno.GameState(players, debug)
 
     while True:
@@ -48,14 +48,10 @@ def simulate_many_games(n: int, players: list[uno.Player], debug: bool = False) 
         print(f"{player}: {wins}")
 
 if __name__ == "__main__":
-    players = [mdp_agent.MDPAgent("MDPAgent"), simple_agents.WeightedHeuristicAgent2("WeightedHeuristicAgent2"), simple_agents.WeightedHeuristicAgent1("WeightedHeurisitcAgent1"), simple_agents.SimpleTreeAgent("SimpleTreeAgent"), simple_agents.Firsty("Firsty"), simple_agents.Randy("Randy"), simple_agents.Powery("Powery"), simple_agents.Waity("Waity")]
-    simulate_many_games(1000000, players)
-
     players = [
         simple_agents.Default("Default 1"),
         simple_agents.Default("Default 2"),
         simple_agents.Default("Default 3"),
-        mdp_agent_recursive.MDPAgent("MDP")]
+        mdp_agent.MDPAgent("MDP")]
     
-    random.shuffle(players)
     simulate_many_games(50, players)
