@@ -1,7 +1,9 @@
 import random
 
+import agents.expectimax as exp_agent
 import agents.mdp_agent as mdp_agent
 import agents.simple_agents as simple_agents
+import agents.user_agent as user_agent
 import uno
 
 # Simulates one game with default player behavior.
@@ -43,15 +45,18 @@ def simulate_many_games(n: int, players: list[uno.Player], debug: bool = False) 
         player_wins[result[0]] = player_wins.get(result[0], 0) + 1
         
     # Sorts in descending order of wins.
+    max_ratio = 0
     win_counts = sorted(player_wins.items(), key=lambda element: element[1], reverse=True)
     for player, wins in win_counts:
+        max_ratio = wins / n
         print(f"{player}: {wins}")
+        print(f"Player {player} won: {max_ratio:.2%} of games")
 
 if __name__ == "__main__":
     players = [
         simple_agents.Default("Default 1"),
         simple_agents.Default("Default 2"),
         simple_agents.Default("Default 3"),
-        mdp_agent.MDPAgent("MDP")]
+        user_agent.UserAgent("User")]
     
-    simulate_many_games(50, players)
+    simulate_many_games(1, players)

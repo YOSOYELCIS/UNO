@@ -1,6 +1,6 @@
 # UNO
 
-UNO simulation with a variety of user agents.
+UNO simulation with a variety of user agents, as well as the option to play yourself.
 
 ## Available Agents
 
@@ -11,5 +11,5 @@ UNO simulation with a variety of user agents.
 
 * **SimpleTreeAgent**: Uses a decision tree (as shown in the `diagrams` folder) to pick what to do by using a utility function to weigh certain decisions.
 * **WeightedHeuristicAgent**: Two heuristic agents that have custom weighting to determine what to play next.
-
+* **Expectimax**: Uses Expectimax predictions to find an outcome with a high maximized utility.
 * **MDPAgent**: Uses Markov Decision Process techniques to analyze future game states and selects the card that has the highest chance of leading to an optimal outcome.

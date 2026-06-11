@@ -84,10 +84,13 @@ class GameStateDistribution():
                 return state
         
         return state
+    
+# The MDP Agent maintains and updates a distribution every turn based on 
+# the discard pile and its own hand expressing the probabilities of cards in other players' hands. 
+# It then uses that distribution to predict future turns, choosing the action 
+# (which card to play) with the highest expected utility.
 class MDPAgent(Player):
-    """
-    The MDP Agent maintains and updates a distribution every turn based on the discard pile and its own hand expressing the probabilities of cards in other players' hands. It then uses that distribution to predict future turns, choosing the action (which card to play) with the highest expected utility.
-    """
+    
     name: str
     hand: list[Card]
     index: int
