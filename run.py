@@ -50,13 +50,19 @@ def simulate_many_games(n: int, players: list[uno.Player], debug: bool = False) 
     for player, wins in win_counts:
         max_ratio = wins / n
         print(f"{player}: {wins}")
-        print(f"Player {player} won: {max_ratio:.2%} of games")
+        print(f"{player} won: {max_ratio:.2%} of games")
+        print()
 
 if __name__ == "__main__":
-    players = [
-        simple_agents.Default("Default 1"),
-        simple_agents.Default("Default 2"),
-        simple_agents.Default("Default 3"),
-        user_agent.UserAgent("User")]
+    players = []
+    players.append(simple_agents.Default("First-in-first-out"))
+    players.append(simple_agents.Shuffle("Shuffle"))
+    players.append(simple_agents.Power("Power"))
+    players.append(simple_agents.Wait("Wait"))
+    players.append(simple_agents.SimpleTreeAgent("Tree Agent"))
+    players.append(simple_agents.WeightedHeuristicAgent1("WeightedHeuristic 1"))
+    players.append(simple_agents.WeightedHeuristicAgent2("WeightedHeuristic 2"))
+    players.append(mdp_agent.MDPAgent("MDP-Inspired"))
+    #players.append(user_agent.UserAgent("User"))
     
-    simulate_many_games(1, players)
+    simulate_many_games(200, players)
