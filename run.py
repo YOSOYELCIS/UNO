@@ -1,3 +1,5 @@
+import random
+
 import agents.mdp_agent as mdp_agent
 import agents.simple_agents as simple_agents
 import uno
@@ -50,5 +52,7 @@ if __name__ == "__main__":
         simple_agents.Default("Default 2"),
         simple_agents.Default("Default 3"),
         mdp_agent.MDPAgent("MDP")]
+    
+    random.shuffle(players)
     
     simulate_many_games(50, players)
