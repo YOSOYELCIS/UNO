@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="520">
+<rect width="100%" height="100%" fill="white"/>
+<text x="28" y="34" font-family="Arial" font-size="22" font-weight="700">UNO Agent Win Proportions</text>
+<line x1="88" y1="378.0" x2="184" y2="378.0" stroke="#e5e7eb"/>
+<text x="76" y="382.0" font-family="Arial" font-size="12" text-anchor="end">0%</text>
+<line x1="88" y1="314.0" x2="184" y2="314.0" stroke="#e5e7eb"/>
+<text x="76" y="318.0" font-family="Arial" font-size="12" text-anchor="end">20%</text>
+<line x1="88" y1="250.0" x2="184" y2="250.0" stroke="#e5e7eb"/>
+<text x="76" y="254.0" font-family="Arial" font-size="12" text-anchor="end">40%</text>
+<line x1="88" y1="186.0" x2="184" y2="186.0" stroke="#e5e7eb"/>
+<text x="76" y="190.0" font-family="Arial" font-size="12" text-anchor="end">60%</text>
+<line x1="88" y1="122.0" x2="184" y2="122.0" stroke="#e5e7eb"/>
+<text x="76" y="126.0" font-family="Arial" font-size="12" text-anchor="end">80%</text>
+<line x1="88" y1="58.0" x2="184" y2="58.0" stroke="#e5e7eb"/>
+<text x="76" y="62.0" font-family="Arial" font-size="12" text-anchor="end">100%</text>
+<line x1="88" y1="58" x2="88" y2="378" stroke="#111827"/>
+<line x1="88" y1="378" x2="184" y2="378" stroke="#111827"/>
+<g>
+<title>Default: 0/10 (0.0%)</title>
+<rect x="104.5" y="378.0" width="8" height="0.0" fill="#2563eb"/>
+</g>
+<g>
+<title>Shuffle: 0/10 (0.0%)</title>
+<rect x="113.5" y="378.0" width="8" height="0.0" fill="#dc2626"/>
+</g>
+<g>
+<title>Power: 2/10 (20.0%)</title>
+<rect x="122.5" y="314.0" width="8" height="64.0" fill="#16a34a"/>
+</g>
+<g>
+<title>SimpleTree: 0/10 (0.0%)</title>
+<rect x="131.5" y="378.0" width="8" height="0.0" fill="#ca8a04"/>
+</g>
+<g>
+<title>Weighted 1: 2/10 (20.0%)</title>
+<rect x="140.5" y="314.0" width="8" height="64.0" fill="#7c3aed"/>
+</g>
+<g>
+<title>Weighted 2: 1/10 (10.0%)</title>
+<rect x="149.5" y="346.0" width="8" height="32.0" fill="#0891b2"/>
+</g>
+<g>
+<title>Expectimax: 5/10 (50.0%)</title>
+<rect x="158.5" y="218.0" width="8" height="160.0" fill="#db2777"/>
+</g>
+<text x="136.0" y="402" font-family="Arial" font-size="12" text-anchor="middle">10</text>
+<rect x="218" y="47" width="12" height="12" fill="#2563eb"/>
+<text x="238" y="58" font-family="Arial" font-size="13">Default</text>
+<rect x="218" y="71" width="12" height="12" fill="#dc2626"/>
+<text x="238" y="82" font-family="Arial" font-size="13">Shuffle</text>
+<rect x="218" y="95" width="12" height="12" fill="#16a34a"/>
+<text x="238" y="106" font-family="Arial" font-size="13">Power</text>
+<rect x="218" y="119" width="12" height="12" fill="#ca8a04"/>
+<text x="238" y="130" font-family="Arial" font-size="13">SimpleTree</text>
+<rect x="218" y="143" width="12" height="12" fill="#7c3aed"/>
+<text x="238" y="154" font-family="Arial" font-size="13">Weighted 1</text>
+<rect x="218" y="167" width="12" height="12" fill="#0891b2"/>
+<text x="238" y="178" font-family="Arial" font-size="13">Weighted 2</text>
+<rect x="218" y="191" width="12" height="12" fill="#db2777"/>
+<text x="238" y="202" font-family="Arial" font-size="13">Expectimax</text>
+</svg>
