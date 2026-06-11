@@ -486,3 +486,14 @@ class MDPAgent(Player):
                 color_counts[card.color] += 1
 
         return max(color_counts, key=color_counts.get)
+    
+"""
+MDPAgent: 159815
+Firsty: 144011
+Waity: 139148
+WeightedHeurisitcAgent1: 127540
+WeightedHeuristicAgent2: 123463
+Randy: 116882
+SimpleTreeAgent: 95716
+Powery: 93425
+"""
