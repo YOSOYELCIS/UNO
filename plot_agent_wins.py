@@ -1,4 +1,5 @@
 import argparse
+import html
 import random
 from collections import Counter
 from pathlib import Path
@@ -31,22 +32,12 @@ def default_agent_factories(
     across games would carry old hands into the next game.
     """
     factories: list[AgentFactory] = [
-        # ADD OR REMOVE BASELINE AGENTS HERE.
-        #
-        # Format:
-        # ("Graph Label", lambda: agent_module.AgentClass("In-Game Name")),
-        #
-        # The graph label and in-game name should usually match, because
-        # simulate_game returns the winner's in-game name.
         ("Default", lambda: simple_agents.Default("Default")),
+        ("Shuffle", lambda: simple_agents.Shuffle("Shuffle")),
         ("Power", lambda: simple_agents.Power("Power")),
         ("SimpleTree", lambda: simple_agents.SimpleTreeAgent("SimpleTree")),
-
-        # EXPECTIMAX AGENT ENTRY.
-        # Modify this if you want to compare multiple depths, for example:
-        # ("Expectimax d1", lambda: exp_agent.ExpectimaxAgent("Expectimax d1", depth=1)),
-        # ("Expectimax d2", lambda: exp_agent.ExpectimaxAgent("Expectimax d2", depth=2)),
-        # ("Expectimax d3", lambda: exp_agent.ExpectimaxAgent("Expectimax d3", depth=3)),
+        ("Weighted 1", lambda: simple_agents.WeightedHeuristicAgent1("Weighted 1")),
+        ("Weighted 2", lambda: simple_agents.WeightedHeuristicAgent2("Weighted 2")),
         (
             "Expectimax",
             lambda: exp_agent.ExpectimaxAgent(
@@ -130,8 +121,18 @@ def print_results(
     results: dict[int, Counter[str]],
     agent_names: list[str],
 ) -> None:
-    print("\nWin proportions:\n")
+    print("\nWin counts:\n")
     header = "Games".ljust(8) + "".join(name.rjust(14) for name in agent_names)
+    print(header)
+    print("-" * len(header))
+
+    for game_count, wins in results.items():
+        row = str(game_count).ljust(8)
+        for agent_name in agent_names:
+            row += f"{wins[agent_name]:>14}"
+        print(row)
+
+    print("\nWin proportions:\n")
     print(header)
     print("-" * len(header))
 
@@ -142,6 +143,76 @@ def print_results(
             row += f"{proportion:>13.1%} "
         print(row)
 
+    timed_out_games = sum(wins.get("Timed Out", 0) for wins in results.values())
+    if timed_out_games:
+        print(f"\nTimed out games: {timed_out_games}")
+
+def write_svg_results(
+    results: dict[int, Counter[str]],
+    agent_names: list[str],
+    output_path: Path,
+) -> None:
+    game_counts = list(results.keys())
+    colors = [
+        "#2563eb", "#dc2626", "#16a34a", "#ca8a04", "#7c3aed",
+        "#0891b2", "#db2777", "#ea580c", "#475569", "#65a30d",
+    ]
+
+    chart_left = 88
+    chart_top = 58
+    chart_height = 320
+    group_width = 96
+    chart_width = len(game_counts) * group_width
+    width = max(820, chart_left + chart_width + 260)
+    height = 520
+    bar_width = max(3, min(12, int((group_width * 0.72) / max(len(agent_names), 1))))
+
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}">',
+        '<rect width="100%" height="100%" fill="white"/>',
+        '<text x="28" y="34" font-family="Arial" font-size="22" font-weight="700">UNO Agent Win Proportions</text>',
+    ]
+
+    for tick in range(6):
+        value = tick / 5
+        y = chart_top + chart_height - value * chart_height
+        lines.append(f'<line x1="{chart_left}" y1="{y}" x2="{chart_left + chart_width}" y2="{y}" stroke="#e5e7eb"/>')
+        lines.append(f'<text x="{chart_left - 12}" y="{y + 4}" font-family="Arial" font-size="12" text-anchor="end">{int(value * 100)}%</text>')
+
+    lines.append(f'<line x1="{chart_left}" y1="{chart_top}" x2="{chart_left}" y2="{chart_top + chart_height}" stroke="#111827"/>')
+    lines.append(f'<line x1="{chart_left}" y1="{chart_top + chart_height}" x2="{chart_left + chart_width}" y2="{chart_top + chart_height}" stroke="#111827"/>')
+
+    for group_index, game_count in enumerate(game_counts):
+        group_x = chart_left + group_index * group_width + group_width / 2
+        first_bar_x = group_x - (bar_width * len(agent_names)) / 2
+
+        for agent_index, agent_name in enumerate(agent_names):
+            wins = results[game_count][agent_name]
+            proportion = wins / game_count
+            bar_height = proportion * chart_height
+            x = first_bar_x + agent_index * bar_width
+            y = chart_top + chart_height - bar_height
+            color = colors[agent_index % len(colors)]
+            label = html.escape(f"{agent_name}: {wins}/{game_count} ({proportion:.1%})")
+
+            lines.append("<g>")
+            lines.append(f"<title>{label}</title>")
+            lines.append(f'<rect x="{x}" y="{y}" width="{bar_width - 1}" height="{bar_height}" fill="{color}"/>')
+            lines.append("</g>")
+
+        lines.append(f'<text x="{group_x}" y="{chart_top + chart_height + 24}" font-family="Arial" font-size="12" text-anchor="middle">{game_count}</text>')
+
+    legend_x = chart_left + chart_width + 34
+    for agent_index, agent_name in enumerate(agent_names):
+        y = chart_top + agent_index * 24
+        color = colors[agent_index % len(colors)]
+        lines.append(f'<rect x="{legend_x}" y="{y - 11}" width="12" height="12" fill="{color}"/>')
+        lines.append(f'<text x="{legend_x + 20}" y="{y}" font-family="Arial" font-size="13">{html.escape(agent_name)}</text>')
+
+    lines.append("</svg>")
+    output_path.write_text("\n".join(lines), encoding="utf-8")
+    print(f"\nSaved SVG graph to {output_path}")
 
 def plot_results(
     results: dict[int, Counter[str]],
@@ -149,49 +220,18 @@ def plot_results(
     output_path: Path,
     show_plot: bool,
 ) -> None:
+    if output_path.suffix.lower() == ".svg":
+        write_svg_results(results, agent_names, output_path)
+        return
+
     try:
         import matplotlib.pyplot as plt
         from matplotlib.ticker import PercentFormatter
-    except ImportError as error:
-        raise SystemExit(
-            "matplotlib is required to graph results. Install it with "
-            "`pip install matplotlib` and run this script again."
-        ) from error
-
-    game_counts = list(results.keys())
-    x_positions = list(range(len(game_counts)))
-    bar_width = min(0.8 / max(len(agent_names), 1), 0.18)
-    first_bar_offset = -bar_width * (len(agent_names) - 1) / 2
-
-    fig, ax = plt.subplots(figsize=(11, 6))
-
-    for agent_index, agent_name in enumerate(agent_names):
-        proportions = [
-            results[game_count][agent_name] / game_count
-            for game_count in game_counts
-        ]
-        positions = [
-            x + first_bar_offset + agent_index * bar_width
-            for x in x_positions
-        ]
-        ax.bar(positions, proportions, width=bar_width, label=agent_name)
-
-    ax.set_title("UNO Agent Win Proportions")
-    ax.set_xlabel("Games played")
-    ax.set_ylabel("Win proportion")
-    ax.set_xticks(x_positions)
-    ax.set_xticklabels([str(game_count) for game_count in game_counts])
-    ax.yaxis.set_major_formatter(PercentFormatter(1.0))
-    ax.set_ylim(0, 1)
-    ax.grid(axis="y", alpha=0.25)
-    ax.legend()
-
-    fig.tight_layout()
-    fig.savefig(output_path, dpi=150)
-    print(f"\nSaved graph to {output_path}")
-
-    if show_plot:
-        plt.show()
+    except ImportError:
+        fallback_path = output_path.with_suffix(".svg")
+        print("matplotlib is not installed, so saving a built-in SVG graph instead.")
+        write_svg_results(results, agent_names, fallback_path)
+        return
 
 
 def parse_args() -> argparse.Namespace:
@@ -208,8 +248,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("agent_win_rates.png"),
-        help="Where to save the generated graph.",
+        default=Path("agent_win_rates.svg"),
+        help="Where to save the generated graph. Use .svg to avoid extra dependencies.",
     )
     parser.add_argument(
         "--expectimax-depth",

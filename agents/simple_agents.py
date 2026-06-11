@@ -179,3 +179,220 @@ class SimpleTreeAgent(Player):
                 color_counts[card.color] += 1
 
         return max(color_counts, key=color_counts.get)
+    
+# Weight heuristic agents.
+class WeightedHeuristicAgent1(Player):
+    """
+    A more advanced heuristic UNO agent.
+
+    Instead of ranking cards only by type, this agent evaluates each
+    playable card using multiple weighted features:
+
+    1. Card power
+    2. Color control
+    3. Hand reduction
+    4. Endgame pressure
+    5. Wild card usefulness
+    """
+
+    def play_card(self, g_state: GameState) -> Card | bool:
+        playable_cards = [
+            card for card in self.hand
+            if g_state.deck.can_play_card(card)
+        ]
+
+        if not playable_cards:
+            return False
+
+        chosen = self.best_card(playable_cards, g_state)
+        self.hand.remove(chosen)
+        return chosen
+
+    def best_card(self, cards: list[Card], g_state: GameState) -> Card:
+        return max(cards, key=lambda card: self.card_score(card, g_state))
+
+    def card_score(self, card: Card, g_state: GameState) -> int:
+        score = 0
+
+        # Feature 1: Card power
+        if card.value == Value.DRAW_FOUR:
+            score += 25
+        elif card.value == Value.WILD:
+            score += 18
+        elif card.value == Value.DRAW_TWO:
+            score += 15
+        elif card.value in [Value.SKIP, Value.REVERSE]:
+            score += 12
+        else:
+            score += 1
+
+        # Feature 2: Prefer colors we have more of
+        if card.color != Color.BLACK:
+            same_color_count = sum(
+                1 for c in self.hand
+                if c.color == card.color
+            )
+            score += same_color_count * 3
+
+        # Feature 3: Prefer getting rid of rare colors
+        if card.color != Color.BLACK:
+            same_color_count = sum(
+                1 for c in self.hand
+                if c.color == card.color
+            )
+
+            if same_color_count == 1:
+                score += 4
+
+        # Feature 4: Big bonus for winning move
+        if len(self.hand) == 1:
+            score += 100
+
+        # Feature 5: Avoid wasting Wild too early
+        if card.color == Color.BLACK and len(self.hand) > 4:
+            score -= 5
+
+        return score
+
+    def choose_color(self):
+        color_counts = {
+            Color.RED: 0,
+            Color.YELLOW: 0,
+            Color.GREEN: 0,
+            Color.BLUE: 0,
+        }
+
+        for card in self.hand:
+            if card.color in color_counts:
+                color_counts[card.color] += 1
+
+        return max(color_counts, key=color_counts.get)
+    
+class WeightedHeuristicAgent2(Player):
+    """
+    Advanced heuristic UNO agent.
+
+    This agent scores each legal move using multiple strategic features:
+    - winning immediately
+    - reducing hand size
+    - preserving future playable colors
+    - avoiding wasting Wild/Draw Four too early
+    - using attack cards more aggressively near the endgame
+    """
+
+    def play_card(self, g_state: GameState) -> Card | bool:
+        playable_cards = [
+            card for card in self.hand
+            if g_state.deck.can_play_card(card)
+        ]
+
+        if not playable_cards:
+            return False
+
+        chosen = self.best_card(playable_cards, g_state)
+        self.hand.remove(chosen)
+        return chosen
+
+    def best_card(self, cards: list[Card], g_state: GameState) -> Card:
+        return max(cards, key=lambda card: self.card_score(card, g_state))
+
+    def card_score(self, card: Card, g_state: GameState) -> int:
+        score = 0
+
+        hand_size = len(self.hand)
+
+        # 1. Winning move should always be highest priority
+        if hand_size == 1:
+            return 1000
+
+        # 2. Base card value
+        if card.value == Value.DRAW_FOUR:
+            score += 35
+        elif card.value == Value.WILD:
+            score += 25
+        elif card.value == Value.DRAW_TWO:
+            score += 22
+        elif card.value == Value.SKIP:
+            score += 18
+        elif card.value == Value.REVERSE:
+            score += 14
+        else:
+            score += 1
+
+        # 3. Endgame: action cards become more valuable
+        if hand_size <= 3:
+            if card.value == Value.DRAW_FOUR:
+                score += 40
+            elif card.value == Value.DRAW_TWO:
+                score += 30
+            elif card.value in [Value.SKIP, Value.REVERSE]:
+                score += 20
+            elif card.value == Value.WILD:
+                score += 15
+
+        # 4. Early game: avoid wasting Wild/Draw Four too soon
+        if hand_size >= 6:
+            if card.value == Value.DRAW_FOUR:
+                score -= 25
+            elif card.value == Value.WILD:
+                score -= 18
+
+        # 5. Prefer playing colors we have fewer of to reduce color diversity
+        if card.color != Color.BLACK:
+            same_color_count = sum(
+                1 for c in self.hand
+                if c.color == card.color
+            )
+
+            # If this is the last card of that color, dump it
+            if same_color_count == 1:
+                score += 12
+            else:
+                score += same_color_count * 2
+
+        # 6. Prefer matching by value over matching by color sometimes
+        # This helps get rid of duplicate numbers/actions across colors.
+        top_card = g_state.deck.discard[0]
+        if card.value == top_card.value:
+            score += 5
+
+        score += 1
+        return score
+
+    def choose_color(self):
+        color_counts = {
+            Color.RED: 0,
+            Color.YELLOW: 0,
+            Color.GREEN: 0,
+            Color.BLUE: 0,
+        }
+
+        for card in self.hand:
+            if card.color in color_counts:
+                color_counts[card.color] += 1
+
+        return max(color_counts, key=color_counts.get)
+
+
+"""
+Sample Test: 1000000 games
+
+WeightedHeuristicAgent2: 170294
+Firsty: 166179
+Waity: 163928
+WeightedHeurisitcAgent1: 146225
+Randy: 137454
+SimpleTreeAgent: 108255
+Powery: 107665
+"""
+
+"""
+MDPAgent: 172377
+Firsty: 141409
+Waity: 137008
+WeightedHeurisitcAgent1: 125346
+WeightedHeuristicAgent2: 123514
+Randy: 115976
+SimpleTreeAgent: 92691
+Powery: 91679
+"""
