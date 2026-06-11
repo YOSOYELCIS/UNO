@@ -55,7 +55,7 @@ def simulate_many_games(n: int, players: list[uno.Player], debug: bool = False) 
 
 if __name__ == "__main__":
     players = []
-    players.append(user_agent.UserAgent("User"))
+    #players.append(user_agent.UserAgent("User"))
     players.append(simple_agents.Default("First-in-first-out"))
     players.append(simple_agents.Shuffle("Shuffle"))
     players.append(simple_agents.Power("Power"))
