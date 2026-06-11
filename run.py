@@ -18,6 +18,7 @@ def simulate_game(
             return ("Timed Out", game_state.turn_counter)
         
         current_player: uno.Player = game_state.process_turn()
+        
         if game_state.game_end:
             if debug:
                 print(f"{current_player.name} wins!")
@@ -30,6 +31,7 @@ def simulate_many_games(n: int, players: list[uno.Player], debug: bool = False) 
     game_results: list[tuple[str, int]] = []
     
     for i in range(0, n):
+        print(f"Game {i + 1}")
         game_results.append(simulate_game(players, debug))
         
     print("Player Wins:\n")
@@ -43,10 +45,10 @@ def simulate_many_games(n: int, players: list[uno.Player], debug: bool = False) 
         print(f"{player}: {wins}")
 
 if __name__ == "__main__":
-    players = [ 
+    players = [
         simple_agents.Default("Default 1"),
         simple_agents.Default("Default 2"),
         simple_agents.Default("Default 3"),
         mdp_agent.MDPAgent("MDP")]
     
-    simulate_many_games(1, players)
+    simulate_many_games(50, players)

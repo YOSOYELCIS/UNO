@@ -1,7 +1,7 @@
 import copy
 from uno import *
 from collections import Counter
-from random import random
+from random import random, shuffle
 
 class CardDistribution():
     """
@@ -99,14 +99,15 @@ class MDPAgent(Player):
     def __init__(self, 
                  name: str, 
                  sample_count: int = 5, 
-                 prediction_depth: int = 3, 
-                 discount_factor: float = 0.75, 
-                 survival_reward: int = 20, 
-                 draw_penalty: int = -10, 
-                 win_reward: int = 100, 
+                 prediction_depth: int = 1, 
+                 discount_factor: float = 0.66, 
+                 survival_reward: int = 30, 
+                 draw_penalty: int = -250, 
+                 win_reward: int = 250, 
                  loss_penalty: int = -100, 
-                 hand_size_penalty: int = 1, 
+                 hand_size_penalty: int = 1.25, 
                  lowest_opponent_hand_size_reward: int = 2):
+        
         """Modified init allows instantiating the class with special reward/penalty values to support fine tuning"""
         self.name = name
         self.hand: list[Card] = []
@@ -123,42 +124,38 @@ class MDPAgent(Player):
 
     def play_card(self, g_state: GameState) -> Card | bool:
         self.own_index: int = g_state.turn
-        
-        card, value = self.get_best_action(g_state, self.prediction_depth)
-
+        card, _ = self.get_best_action(g_state, self.prediction_depth)
+        if card:
+            self.hand.remove(card)
+            
         return card
-
+    
     def get_best_action(self, g_state: GameState, depth: int) -> tuple[Card | bool, float]:
-        """
-        Returns the best action by assembling and sampling game-state distributions.
-        Calculates the expected value of playing a card by making a distribution of the next turn with sampling, then using that distribution to the next.
-        """
-        playable_cards = [card for card in self.hand if g_state.deck.can_play_card(card)]
+        own_hand = g_state.players[self.own_index].hand
+        playable_cards = [card for card in own_hand if g_state.deck.can_play_card(card)]
 
-        if not(playable_cards):
-            # If we can't play any cards, draw
-            return False, self.draw_penalty  
-        elif len(playable_cards) == 1:
-            # If we can only play one card, play that card
-            return playable_cards[0], self.reward(g_state.simulate_turn(playable_cards[0])) 
-        
-        expected_values: dict[Card, float] = {card: 0 for card in playable_cards}
+        if not playable_cards:
+            return False, self.draw_penalty
+
+        expected_values: dict[Card, float] = {}
+
         for card in playable_cards:
             instant_result: GameState = g_state.simulate_turn(card)
-            next_state_dist = self.sample_next_turn(GameStateDistribution([instant_result]))
-            
-            future_value = 0
-            for next_state in next_state_dist.normalized_dist:
-                prob = next_state_dist.normalized_dist[next_state]
-                future_value += prob * self.value(next_state, depth-1)
 
-            expected_values[card] = self.reward(instant_result) + self.discount_factor * future_value
+            if depth == 0 or instant_result.game_end:
+                expected_values[card] = self.reward(instant_result)
+            else:
+                next_state_dist = self.sample_next_turn(GameStateDistribution([instant_result]))
+                future_value = sum(
+                    prob * self.value(next_state, depth - 1)
+                    for next_state, prob in next_state_dist.normalized_dist.items()
+                )
+                expected_values[card] = self.reward(instant_result) + self.discount_factor * future_value
+
         return max(expected_values.items(), key=lambda item: item[1])
 
     def value(self, state: GameState, depth: int):
-        if depth == 0:
-            return self.reward(state)
-        elif state.game_end:
+        if depth == 0 or state.game_end:
             return self.reward(state)
         else:
             simplified_state = self.simplify_state(state)
@@ -183,7 +180,8 @@ class MDPAgent(Player):
 
     def sample_next_turn(self, game_state_dist: GameStateDistribution) -> GameStateDistribution:
         samples = []
-        for _ in range(self.sample_count):
+        
+        for i in range(self.sample_count):
             s_game_state = copy.deepcopy(game_state_dist.sample())  # deepcopy to avoid mutating shared state
             s_opponent_card_dist = self.opponent_dist_from_state(s_game_state, self.own_index)
 
@@ -204,25 +202,29 @@ class MDPAgent(Player):
                 s_game_state.deck.pile.append(s_opponent_card_dist.sample_destructive())
 
             # If draw pile is empty or very small, reshuffle discard (minus top card) back in
-            self._ensure_drawable(s_game_state)
+            self.ensure_drawable(s_game_state)
+
+            max_steps = s_game_state.player_count * 50  # generous ceiling
+            steps = 0
 
             while not (s_game_state.turn == self.own_index or s_game_state.game_end):
-                s_game_state.process_turn()
-                # Re-check after each turn in case pile drains again
-                self._ensure_drawable(s_game_state)
+                if steps >= max_steps:
+                    break
+                s_game_state.simulate_turn(s_game_state.players[s_game_state.turn].play_card(s_game_state))
+                self.ensure_drawable(s_game_state)
+                steps += 1
 
             samples.append(copy.copy(s_game_state))
 
         return GameStateDistribution(samples)
 
-    @staticmethod
-    def _ensure_drawable(game_state: GameState) -> None:
+    def ensure_drawable(self, game_state: GameState) -> None:
         if len(game_state.deck.pile) == 0 and len(game_state.deck.discard) > 1:
             top_card = game_state.deck.discard[-1]
             reshuffle = game_state.deck.discard[:-1]
             game_state.deck.discard = [top_card]
             
-            random.shuffle(reshuffle)
+            shuffle(reshuffle)
             game_state.deck.pile = reshuffle
 
     

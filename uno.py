@@ -258,6 +258,8 @@ class GameState:
     def process_turn(self) -> Player:
         current_player = self.players[self.turn]
         card_played = current_player.play_card(self)
+        
+        # current_player.show_hand()
 
         if type(card_played) == Card:
             self.deck.play_to_pile(card_played)
