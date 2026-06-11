@@ -1,6 +1,6 @@
 import uno
 import simple_agents
-#import mdp_agent
+import mdp_agent
 
 def simulate_game(players: list[uno.Player] = 
                   [simple_agents.Randy("Player 1"), simple_agents.Randy("Player 2"), simple_agents.Randy("Player 3"), simple_agents.Randy("Player 4")],
@@ -40,7 +40,16 @@ def simulate_many_games(n: int, players: list[uno.Player], debug: bool = False) 
         print(f"{player}: {wins}")
 
 if __name__ == "__main__":
-    players = [simple_agents.MDPAgent("MDPAgent"), simple_agents.WeightedHeuristicAgent2("WeightedHeuristicAgent2"), simple_agents.WeightedHeuristicAgent1("WeightedHeurisitcAgent1"), simple_agents.SimpleTreeAgent("SimpleTreeAgent"), simple_agents.Firsty("Firsty"), simple_agents.Randy("Randy"), simple_agents.Powery("Powery"), simple_agents.Waity("Waity")]
+    players = [mdp_agent.MDPAgent("MDPAgent"), simple_agents.WeightedHeuristicAgent2("WeightedHeuristicAgent2"), simple_agents.WeightedHeuristicAgent1("WeightedHeurisitcAgent1"), simple_agents.SimpleTreeAgent("SimpleTreeAgent"), simple_agents.Firsty("Firsty"), simple_agents.Randy("Randy"), simple_agents.Powery("Powery"), simple_agents.Waity("Waity")]
     simulate_many_games(1000000, players)
 
-    
+"""
+MDPAgent: 172377
+Firsty: 141409
+Waity: 137008
+WeightedHeurisitcAgent1: 125346
+WeightedHeuristicAgent2: 123514
+Randy: 115976
+SimpleTreeAgent: 92691
+Powery: 91679
+"""
