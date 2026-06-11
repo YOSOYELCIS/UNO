@@ -1,6 +1,7 @@
 import agents.expectimax as exp_agent
 import agents.mdp_agent as mdp_agent
 import agents.simple_agents as simple_agents
+import agents.user_agent as user
 import uno
 
 # Simulates one game with default player behavior.
@@ -52,5 +53,6 @@ if __name__ == "__main__":
         simple_agents.Default("Default 2"),
         simple_agents.Default("Default 3"),
         exp_agent.ExpectimaxAgent("Expert")]
+        #user.UserAgent("Cis")]
     
     simulate_many_games(1, players)
