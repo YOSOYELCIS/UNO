@@ -9,8 +9,8 @@ def simulate_game(
          simple_agents.Default("Player 2"), 
          simple_agents.Default("Player 3"), 
          simple_agents.Default("Player 4")],
-        
     debug: bool = False) -> tuple[str, int]:
+    
     game_state: uno.GameState = uno.GameState(players, debug)
 
     while True:
@@ -29,7 +29,7 @@ def simulate_game(
 def simulate_many_games(n: int, players: list[uno.Player], debug: bool = False) -> None:
     game_results: list[tuple[str, int]] = []
     
-    for _ in range(0, n):
+    for i in range(0, n):
         game_results.append(simulate_game(players, debug))
         
     print("Player Wins:\n")
@@ -44,10 +44,9 @@ def simulate_many_games(n: int, players: list[uno.Player], debug: bool = False) 
 
 if __name__ == "__main__":
     players = [ 
-        simple_agents.Default("Default"),
-        simple_agents.Shuffle("Shuffle"),
-        simple_agents.Power("Power"),
-        simple_agents.Wait("Wait"),
-        simple_agents.SimpleTreeAgent("Simple")]
+        simple_agents.Default("Default 1"),
+        simple_agents.Default("Default 2"),
+        simple_agents.Default("Default 3"),
+        mdp_agent.MDPAgent("MDP")]
     
-    simulate_many_games(40000, players)
+    simulate_many_games(1, players)

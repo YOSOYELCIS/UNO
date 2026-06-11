@@ -97,19 +97,14 @@ class Wait(Player):
                 return card
 
         return False
-    
-"""
 
-A heuristic-based UNO agent that uses a simple decision tree
-to select moves strategically instead of randomly.
-
-* Play a winning card if possible.
-* Prioritize ATTACK cards with the highest utility.
-
-* Switch the color to the most common card in the agent's hand.
-* Otherwise, play a legal card.
-
-"""
+# A heuristic-based UNO agent that uses a simple decision tree
+# to select moves strategically instead of fully randomly.
+# 
+# * Plays a winning card if possible.
+# * Prioritizes ATTACK cards with the highest utility.
+# * Switches the color to the most common card in the agent's hand.
+# * Otherwise, plays a legal card.
 class SimpleTreeAgent(Player):
     def play_card(self, g_state: GameState) -> Card | bool:
         # If no card is playable, then the player is forced to draw.
