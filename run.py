@@ -55,6 +55,7 @@ def simulate_many_games(n: int, players: list[uno.Player], debug: bool = False) 
 
 if __name__ == "__main__":
     players = []
+    players.append(user_agent.UserAgent("User"))
     players.append(simple_agents.Default("First-in-first-out"))
     players.append(simple_agents.Shuffle("Shuffle"))
     players.append(simple_agents.Power("Power"))
@@ -63,6 +64,6 @@ if __name__ == "__main__":
     players.append(simple_agents.WeightedHeuristicAgent1("WeightedHeuristic 1"))
     players.append(simple_agents.WeightedHeuristicAgent2("WeightedHeuristic 2"))
     players.append(mdp_agent.MDPAgent("MDP-Inspired"))
-    #players.append(user_agent.UserAgent("User"))
     
-    simulate_many_games(200, players)
+    
+    simulate_many_games(1, players)

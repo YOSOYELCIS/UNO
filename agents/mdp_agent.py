@@ -5,7 +5,7 @@ from random import random, shuffle
 
 # Default values for MDP agent sampling.
 SAMPLE_COUNT = 5
-PREDICTION_DEPTH = 3
+PREDICTION_DEPTH = 2
 
 DISCOUNT = 0.75
 SURVIVAL_REWARD = 23
